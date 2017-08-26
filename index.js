@@ -15,14 +15,17 @@ const fs = require('fs');
   });
 
   const client = await CDP();
-  const {Network, Page} = client;
+  const { Network, Page, Console } = client;
   Network.requestWillBeSent((params) => {
-    console.log(params.request.url);
+    //console.log(params.request.url);
+  });
+  Console.messageAdded((message) => {
+    ..console.log(util.inspect(message));
   });
 
-  await Promise.all([Network.enable(), Page.enable()]);
+  await Promise.all([Network.enable(), Page.enable(), Console.enable()]);
 
-  Page.navigate({url: 'https://github.com/'});
+  Page.navigate({url: 'https://www.pinterest.jp/'});
   await Page.loadEventFired();
   const { data } = await Page.captureScreenshot();
   await util.promisify(fs.writeFile)('capture.png', Buffer.from(data, 'base64'));
