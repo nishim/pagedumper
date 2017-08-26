@@ -15,20 +15,27 @@ const fs = require('fs');
   });
 
   const client = await CDP();
-  const { Network, Page, Console } = client;
+  const { Network, Page, Console, DOM } = client;
   Network.requestWillBeSent((params) => {
     //console.log(params.request.url);
   });
   Console.messageAdded((message) => {
-    ..console.log(util.inspect(message));
+    //console.log(util.inspect(message));
   });
 
-  await Promise.all([Network.enable(), Page.enable(), Console.enable()]);
+  await Promise.all([Network.enable(), Page.enable(), Console.enable(), DOM.enable()]);
 
   Page.navigate({url: 'https://www.pinterest.jp/'});
   await Page.loadEventFired();
+
+  // screenshot
   const { data } = await Page.captureScreenshot();
   await util.promisify(fs.writeFile)('capture.png', Buffer.from(data, 'base64'));
+
+  // html
+  const dom = await DOM.getDocument();
+  const html = await DOM.getOuterHTML({nodeId: dom.root.nodeId});
+  console.log(html);
 
   client.close();
   chrome.kill();
