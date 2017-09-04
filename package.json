@@ -8,6 +8,7 @@
   "dependencies": {
     "chrome-launcher": "^0.6.0",
     "chrome-remote-interface": "^0.24.4",
-    "chromy": "^0.4.8"
+    "commander": "^2.11.0",
+    "yaml": "^0.3.0"
   }
 }
