@@ -8,7 +8,7 @@ const cmdr = require('commander');
 cmdr
   .version('0.1.0')
   .option('--without-capture', 'no capture')
-  .option('--without-dom-output', 'no output dump dom')
+  .option('--without-html-output', 'no output dump html')
   .option('--without-log', 'no output chrome\'s console logs')
   .parse(process.argv);
 
@@ -29,7 +29,7 @@ const dumpopts = {
   url: cmdr.args[0],
   device: null,
   capture: !cmdr.withoutCapture,
-  outputDom: !cmdr.withoutDomOutput,
+  outputHtml: !cmdr.withoutHtmlOutput,
   outputLog: !cmdr.withoutLog,
 };
 
@@ -89,27 +89,30 @@ const dump = async (options) => {
     await Emulation.setVisibleSize({ width, height });
 
     let r = {
-      url: options.url,
-      capturePath: '',
-      dom: '',
-      log: []
+      id: (new Date).getTime(),
+      result: {
+        url: options.url,
+        capturePath: '',
+        dom: '',
+        log: []
+      }
     };
   
     if (options.capture) {
       const { data } = await Page.captureScreenshot();
-      r.capturePath = (new Date).getTime() + '.png';
-      await util.promisify(fs.writeFile)(r.capturePath, Buffer.from(data, 'base64'));
+      r.result.capturePath = `${r.id}.png`;
+      await util.promisify(fs.writeFile)(r.result.capturePath, Buffer.from(data, 'base64'));
     }
   
-    if (options.outputDom) {
+    if (options.outputHtml) {
       const dom = await DOM.getDocument();
       const html = await DOM.getOuterHTML({nodeId: dom.root.nodeId});
-      r.dom = html;
+      r.result.html = html;
     }
   
     if (options.outputLog) {
       logs.forEach((v, i, a) => {
-        r.log.push(v.message.level + '\t' + v.message.text.replace(/\n/g, '\\n'));
+        r.result.log.push(v.message.level + '\t' + v.message.text.replace(/\n/g, '\\n'));
       });
     }
 
