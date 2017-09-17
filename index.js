@@ -4,6 +4,7 @@ const CDP = require('chrome-remote-interface');
 const util = require('util');
 const fs = require('fs');
 const cmdr = require('commander');
+const chromePath = process.env.CHROME_PATH
 
 cmdr
   .version('0.1.0')
@@ -36,7 +37,7 @@ const dumpopts = {
 const dump = async (options) => {
   const chrome = await chromeLauncher.launch({
     port: 9222,
-    chromePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
+    chromePath: chromePath,
     chromeFlags: [
       '--headless',
       '--disable-gpu',
@@ -107,7 +108,7 @@ const dump = async (options) => {
     if (options.outputHtml) {
       const dom = await DOM.getDocument();
       const html = await DOM.getOuterHTML({nodeId: dom.root.nodeId});
-      r.result.html = html;
+      r.result.html = html.outerHTML;
     }
   
     if (options.outputLog) {
